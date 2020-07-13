@@ -6,6 +6,7 @@ const lineWeight = 4 * factor
 const subGridSize = gridSize / 4
 const numLines = 1000
 let img
+let updated = false
 
 function display(imageMatrix) {
   loadPixels()
@@ -15,6 +16,31 @@ function display(imageMatrix) {
     }
   }
   updatePixels()
+}
+
+function stdNormalDistribution(x) {
+  return Math.pow(Math.E, -Math.pow(x, 2) / 2) / Math.sqrt(2 * Math.PI);
+}
+
+function distance(x, y) {
+  return Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2))
+}
+
+function gaussianMatrix(size, factor = 1) {
+  if (size % 2 == 0)
+    return new Error('size precisa sem impar')
+
+  const radius = (size - 1) / 2
+
+  const matrix = []
+
+  for (let x = 0; x < size; x++) {
+    matrix[x] = []
+    for (let y = 0; y < size; y++) {
+      matrix[x][y] = stdNormalDistribution(distance(x - radius, y - radius) * factor)
+    }
+  }
+  return matrix
 }
 
 function preload() {
@@ -36,103 +62,42 @@ function setup() {
       imagePixels[x][y] = img.get(x, y)
     }
   }
-
-
-  const mono = rgbToMono(imagePixels)
-
-  bla = Convolution2D(mono, [[1, 1, 1], [1, 1, 1], [1, 1, 1]])
-
-
-  display(bla)
-
 }
 
-// function draw() {
-//   noLoop()
-//   background(255)
+function draw() {
+  if (!updated) {
+
+    modifiedImage = rgbToMono(imagePixels)
+
+    const gaussianBlurKernel = gaussianMatrix(5, 1)
+
+    console.log(gaussianBlurKernel)
+
+    // modifiedImage = Convolution2D(modifiedImage, gaussianBlurKernel)
 
 
-//   const radius = radiusSlider.value()
-//   const diff = diffSlider.value()
-//   const filterRadius = filterRadiusSlider.value()
+    const xKernel = [
+      [-1, 0, 1],
+      [-2, 0, 2],
+      [-1, 0, 1]
+    ]
 
-//   console.log('radius', radius)
-//   console.log('diff', diff)
-//   console.log('filterRadius', filterRadius)
+    const yKernel = [
+      [-1, -2, -1],
+      [0, 0, 0],
+      [1, 2, 1]
+    ]
 
-//   const bordersPixels = getBorders(imagePixels, radius, diff)
+    const xMatrix = convolution2D(modifiedImage, xKernel)
+    const yMatrix = convolution2D(modifiedImage, yKernel)
 
-//   const filtered = filter(bordersPixels, filterRadius)
+    modifiedImage = sqrtMatrix(sumMatrix(squareMatrix(xMatrix), squareMatrix(yMatrix)))
+
+    // modifiedImage = normalizeMatrix(modifiedImage)
 
 
-//   // Visualize image borders map
-//   loadPixels()
-//   for (let x = 0; x < w; x++) {
-//     for (let y = 0; y < h; y++) {
-//       set(x, y, filtered[x][y])
-//     }
-//   }
-//   updatePixels()
+    display(modifiedImage)
 
-//   stroke(0)
-//   strokeWeight(0.5)
-//   for (let x = 0; x < w; x += gridSize) {
-//     line(x, 0, x, h)
-//   }
-//   for (let y = 0; y < h; y += gridSize) {
-//     line(0, y, w, y)
-//   }
-
-//   stroke(0)
-//   strokeWeight(lineWeight)
-//   let drawedLines = Infinity
-
-//   while (drawedLines < numLines) {
-//     const initialX = random(w)
-//     const initialY = random(h)
-
-//     if (bordersPixels[floor(initialY)][floor(initialX)] == 0) {
-
-//       const angle = random(2 * PI)
-//       let toleratedError = 5
-
-//       let finalX = initialX
-//       let finalY = initialY
-
-//       while (true) {
-//         finalX += cos(angle)
-//         finalY += sin(angle)
-
-//         if (
-//           floor(finalX) < 0 ||
-//           floor(finalX) > h ||
-//           floor(finalY) < 0 ||
-//           floor(finalY) > w ||
-//           bordersPixels[floor(finalY)][floor(finalX)] == 255
-//         ) {
-//           toleratedError--
-//           if (toleratedError < 0) {
-
-//             const normalizedInitialX = round(initialX / subGridSize)
-//             const normalizedInitialY = round(initialY / subGridSize)
-//             const normalizedFinalX = round(finalX / subGridSize)
-//             const normalizedFinalY = round(finalY / subGridSize)
-
-//             if (normalizedInitialX != normalizedFinalX || normalizedInitialY != normalizedFinalY) {
-//               line(normalizedInitialX * subGridSize,
-//                 normalizedInitialY * subGridSize,
-//                 normalizedFinalX * subGridSize,
-//                 normalizedFinalY * subGridSize)
-
-//               drawedLines++
-
-//               break
-//             }
-//           }
-//         }
-//       }
-//     }
-//   }
-
-//   // noLoop()
-// }
+    updated = true
+  }
+}

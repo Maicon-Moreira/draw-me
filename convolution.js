@@ -1,6 +1,6 @@
 const gpu = new GPU()
 
-function Convolution2D(matrix, kernel) {
+function convolution2D(matrix, kernel) {
   const matrixWidth = matrix[0].length
   const matrixHeight = matrix.length
 
@@ -16,7 +16,7 @@ function Convolution2D(matrix, kernel) {
   let kernelSum = 0
   for (a of kernel) {
     for (b of a) {
-      kernelSum += b
+      kernelSum += Math.abs(b)
     }
   }
 
@@ -50,7 +50,7 @@ function Convolution2D(matrix, kernel) {
       }
     }
 
-    return result / kernelSum
+    return result
 
   }).setOutput([matrixWidth,
     matrixHeight])
