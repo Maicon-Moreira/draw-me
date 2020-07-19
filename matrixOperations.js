@@ -81,6 +81,8 @@ function normalizeMatrix(m) {
     }
   }
 
+  console.log(minVal, maxVal)
+
   const diff = maxVal - minVal
 
   const factor = 1 / diff
@@ -93,5 +95,22 @@ function normalizeMatrix(m) {
 
   }).setOutput([mWidth, mHeight])
 
+  console.log('kdagfkasgkdaskg')
+
   return gpuFunction(m, minVal, factor)
+}
+
+function multiplyMatrixByNumber(m, number) {
+  const mWidth = m[0].length
+  const mHeight = m.length
+
+  const gpuFunction = gpu.createKernel(function (m, number) {
+    const x = this.thread.x
+    const y = this.thread.y
+
+    return m[y][x] * number
+
+  }).setOutput([mWidth, mHeight])
+
+  return gpuFunction(m, number)
 }

@@ -50,7 +50,7 @@ function convolution2D(matrix, kernel) {
       }
     }
 
-    return result
+    return result / kernelSum
 
   }).setOutput([matrixWidth,
     matrixHeight])

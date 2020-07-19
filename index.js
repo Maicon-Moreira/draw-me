@@ -68,36 +68,34 @@ function draw() {
   if (!updated) {
 
     modifiedImage = rgbToMono(imagePixels)
-
-    const gaussianBlurKernel = gaussianMatrix(5, 1)
-
+    
+    
+    const gaussianBlurKernel = gaussianMatrix(11, 1)
     console.log(gaussianBlurKernel)
-
-    // modifiedImage = Convolution2D(modifiedImage, gaussianBlurKernel)
-
-
+    modifiedImage = convolution2D(modifiedImage, gaussianBlurKernel)
+    
+    
     const xKernel = [
       [-1, 0, 1],
       [-2, 0, 2],
       [-1, 0, 1]
     ]
-
     const yKernel = [
       [-1, -2, -1],
       [0, 0, 0],
       [1, 2, 1]
     ]
-
     const xMatrix = convolution2D(modifiedImage, xKernel)
     const yMatrix = convolution2D(modifiedImage, yKernel)
-
     modifiedImage = sqrtMatrix(sumMatrix(squareMatrix(xMatrix), squareMatrix(yMatrix)))
-
+    
+    
     // modifiedImage = normalizeMatrix(modifiedImage)
-
-
+    
+    
+    modifiedImage = multiplyMatrixByNumber(modifiedImage, 10)
     display(modifiedImage)
-
+    
     updated = true
   }
 }
